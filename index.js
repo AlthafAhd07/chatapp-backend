@@ -34,7 +34,7 @@ mongoose.connect(
 );
 
 app.get("/", (request, response) => {
-  response.json({ msg: "socket.io connected" });
+  response.json({ msg: "socket.io in separate file" });
 });
 
 /** start server */
