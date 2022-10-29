@@ -4,7 +4,6 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import { Server } from "socket.io";
 dotenv.config();
 
 const app = express();
@@ -33,9 +32,17 @@ mongoose.connect(
   }
 );
 
+import ConservationRoutes from "./routes/conservationRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+
 app.get("/", (request, response) => {
   response.json({ msg: "socket.io in separate file" });
 });
+
+app.use("/api", ConservationRoutes);
+app.use("/api", authRoutes);
+app.use("/api", userRoutes);
 
 /** start server */
 app.listen(port, () => {

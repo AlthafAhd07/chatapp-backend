@@ -6,15 +6,12 @@ dotenv.config();
 
 const CLIENT_URL = process.env.CLIENT__URL;
 
-console.log(CLIENT_URL);
-
 const io = new Server(5001, {
   cors: {
     origin: CLIENT_URL,
     credentials: true,
   },
 });
-
 io.use((socket, next) => {
   const username = socket.handshake.auth.username;
   if (!username) {
@@ -35,6 +32,7 @@ let onlineUsers = [];
 
 io.on("connection", async (socket) => {
   // When user connected
+
   const username = socket.username;
 
   console.log(`${username} just connected`);
