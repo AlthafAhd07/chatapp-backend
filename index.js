@@ -31,10 +31,12 @@ mongoose.connect(
 );
 
 app.get("/", (request, response) => {
-  response.json({ msg: "mongo db connected" });
+  response.json({ msg: "socket.io connected" });
 });
 
 /** start server */
 app.listen(port, () => {
   console.log(`Server started at port: ${port}`);
 });
+
+import "./usingWebSocket.js";
