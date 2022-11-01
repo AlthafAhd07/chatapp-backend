@@ -79,13 +79,14 @@ io.on("connection", async (socket) => {
 
   console.log(`${username} just connected`);
 
+  // updating the user to online users list
   const inOnline = onlineUsers.find((e) => e.username === username);
   if (inOnline === undefined) {
     onlineUsers.unshift({ username, avatar: socket.avatar });
   }
-
   // updating user as online in database
   await Users.findOneAndUpdate({ username }, { online: ["true", "now"] });
+
   // getting users chat list
   const opponentChats = await Conversations.find(
     {
@@ -96,9 +97,11 @@ io.on("connection", async (socket) => {
   const userChatOpponents = opponentChats.map(
     (i) => i.participant.filter((name) => name !== username)[0]
   );
+
   const opponentUsersWhoAreOnline = onlineUsers.filter((element) => {
     return userChatOpponents.includes(element.username);
   });
+
   // updateThe newOnline user To others
   for (let [id, socketUser] of io.of("/").sockets) {
     if (socketUser.username !== username) {
@@ -110,10 +113,7 @@ io.on("connection", async (socket) => {
       }
     }
   }
-
-  socket.on("getOnlineUsers", () => {
-    socket.emit("onlineusers", opponentUsersWhoAreOnline);
-  });
+  socket.emit("onlineusers", opponentUsersWhoAreOnline);
 
   // joining chat room
 
@@ -122,6 +122,7 @@ io.on("connection", async (socket) => {
     socket.join(data + "123");
     socket.join(data + "12345");
   });
+
   socket.on("send_message", ({ message, room, conversationId, receiver }) => {
     const rooms = io.of("/").adapter.rooms;
     const roomCount = rooms.get(room);
