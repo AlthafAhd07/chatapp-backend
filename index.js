@@ -62,13 +62,18 @@ const io = new Server(server, {
   },
 });
 
-io.use((socket, next) => {
+io.use(async (socket, next) => {
   const username = socket.handshake.auth.username;
   if (!username) {
     return next(new Error("invalid username"));
   }
-  socket.username = username;
-  socket.avatar = socket.handshake.query.avatar;
+  const user = await Users.findOne({ username: username });
+
+  if (!user) {
+    return next(new Error("User does not exists"));
+  }
+  socket.username = user.username;
+  socket.avatar = user.avator;
   next();
 });
 let onlineUsers = [];
