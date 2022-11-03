@@ -12,6 +12,8 @@ const app = express();
 app.use(
   cors({
     "Access-Control-Allow-Origin": "*",
+    origin: "*",
+    credentials: true,
   })
 );
 app.use(express.json());
