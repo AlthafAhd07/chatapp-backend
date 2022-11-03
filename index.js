@@ -4,6 +4,7 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import jwt from "jsonwebtoken";
 dotenv.config();
 
 const app = express();
@@ -63,18 +64,27 @@ const io = new Server(server, {
 });
 
 io.use(async (socket, next) => {
-  const username = socket.handshake.auth.username;
-  if (!username) {
-    return next(new Error("invalid username"));
+  const token = socket.handshake.auth.token;
+  if (!token) {
+    return next(new Error("invalid connection"));
   }
-  const user = await Users.findOne({ username: username });
+  try {
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    if (!decoded.id) {
+      return next(new Error("invalid connection"));
+    }
 
-  if (!user) {
-    return next(new Error("User does not exists"));
+    const user = await Users.findById(decoded.id);
+
+    if (!user) {
+      return next(new Error("User does not exists"));
+    }
+    socket.username = user.username;
+    socket.avatar = user.avator;
+    next();
+  } catch (error) {
+    return next(new Error("invalid connection"));
   }
-  socket.username = user.username;
-  socket.avatar = user.avator;
-  next();
 });
 let onlineUsers = [];
 

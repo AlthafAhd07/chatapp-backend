@@ -1,11 +1,7 @@
 import Users from "../models/userSchema.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import {
-  Activation_token,
-  Access_token,
-  Refresh_token,
-} from "../configs/web_tokens.js";
+import { Access_token, Refresh_token } from "../configs/web_tokens.js";
 
 import { validateEmail } from "../middlewares/Valid.js";
 import sendMail from "../configs/sendMail.js";
@@ -26,64 +22,35 @@ const userCtrl = {
       const passwordHash = await bcrypt.hash(password, 12);
 
       const newUser = {
-        name,
-        account,
-        passwordHash,
+        username: name,
+        account: account,
+        password: passwordHash,
+        online: [false, Date.now()],
       };
+      const userNew = await new Users(newUser);
 
-      const activation_token = Activation_token(newUser);
+      await userNew.save();
 
-      const url = `${process.env.CLIENT_URL}/active/${activation_token}`;
-      if (validateEmail(account)) {
-        await sendMail(account, url, "Please register your Account");
-        return res
-          .status(200)
-          .json({ msg: "Success! Please check your email" });
-      } else
-        return res
-          .status(500)
-          .json({ msg: "Please enter a valid number or email" });
+      const refresh_token = Refresh_token({ id: userNew._id });
+
+      res.cookie("refresh_token", refresh_token, {
+        httpOnly: true,
+        path: "/api/refresh_token",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 30 days
+      });
+
+      await Users.findOneAndUpdate(
+        { _id: userNew._id },
+        {
+          rf_token: refresh_token,
+        }
+      );
+      res.status(201).json({ msg: "Account has been created Successfully!" });
     } catch (error) {
       return res.status(500).json({ msg: error.message });
     }
   },
-  activeAccount: async (req, res) => {
-    try {
-      const { activation_token } = req.body;
 
-      if (!activation_token)
-        return res.status(500).json({ msg: "Invalid Authontication" });
-      const decoded = jwt.verify(
-        activation_token,
-        process.env.ACTIVATION_TOKEN_SECRET
-      );
-
-      if (!decoded)
-        return res.status(500).json({ msg: "Invalid Authontication" });
-      const newUser = {
-        username: decoded.name,
-        account: decoded.account,
-        password: decoded.passwordHash,
-        online: [false, Date.now()],
-      };
-      const user = await new Users(newUser);
-
-      await user.save();
-      res.status(201).json({ msg: "Account has been activated" });
-    } catch (error) {
-      if (error.message.match(/E11000 duplicate key error collection/g)) {
-        return res.status(500).json({ msg: "Account already exists" });
-      } else if (error.message == "jwt expired") {
-        return res
-          .status(500)
-          .json({ msg: "Your token has expired, Please register again" });
-      } else if (error.message.match(/Your name is upto 20 char long/g)) {
-        return res.status(500).json({ msg: "Your name is upto 20 characters" });
-      } else {
-        return res.status(500).json({ msg: "Invalid Authontication" });
-      }
-    }
-  },
   login: async (req, res) => {
     try {
       const { account, password } = req.body;

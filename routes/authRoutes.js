@@ -8,7 +8,7 @@ import { Auth } from "../middlewares/auth.js"; // this should be used to login p
 
 const route = express.Router();
 route.post("/register", validRegister, userCtl.register);
-route.post("/active", userCtl.activeAccount);
+// route.post("/active", userCtl.activeAccount);
 route.post("/login", userCtl.login);
 
 route.get("/logout", Auth, userCtl.logout);
