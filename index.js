@@ -17,10 +17,11 @@ app.use(
   })
 );
 
+app.use(cookieParser());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(morgan("dev"));
-app.use(cookieParser());
 
 const PORT = process.env.PORT || 5000;
 const CLIENT__URL = process.env.CLIENT__URL;

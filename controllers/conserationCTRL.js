@@ -3,7 +3,8 @@ import { v4 as uuidv4 } from "uuid";
 import userSchema from "../models/userSchema.js";
 const conservationCTRL = {
   getSpecificConservation: async (req, res) => {
-    const { opponent, username } = req.body;
+    const { opponent } = req.body;
+    const { username } = req.user;
 
     if (!username) return;
     if (!opponent) {
@@ -45,7 +46,8 @@ const conservationCTRL = {
     }
   },
   updateMessage: async (req, res) => {
-    const { opponent, newMsg, username } = req.body;
+    const { opponent, newMsg } = req.body;
+    const { username } = req.user;
     if (!username) return;
     if (!opponent) {
       return res.status(400).json({ msg: "Opposite person not found" });
@@ -80,7 +82,8 @@ const conservationCTRL = {
     res.status(200).json({ msg: updatedChat });
   },
   getAllUserChats: async (req, res) => {
-    const { username } = req.body;
+    const { username } = req.user;
+
     if (!username) return;
     const chats = await conservationSchema.find(
       {
@@ -91,8 +94,8 @@ const conservationCTRL = {
     res.status(200).json({ msg: chats });
   },
   updateMsgStatus: async (req, res) => {
-    const { username, conversationId, msgId } = req.body;
-
+    const { conversationId, msgId } = req.body;
+    const { username } = req.user;
     if (!conversationId || !msgId) {
       return res.status(400).json({ msg: "needed data missing" });
     }

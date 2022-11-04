@@ -75,6 +75,7 @@ const userCtrl = {
 
       res.cookie("refresh_token", refresh_token, {
         httpOnly: true,
+        secure: false,
         path: "/api/refresh_token",
         maxAge: 7 * 24 * 60 * 60 * 1000, // 30 days
       });
