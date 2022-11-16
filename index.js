@@ -94,7 +94,7 @@ io.use(async (socket, next) => {
       return next(new Error("User does not exists"));
     }
     socket.username = user.username;
-    socket.avatar = user.avator;
+    socket.avatar = user.avatar;
     next();
   } catch (error) {
     return next(new Error("invalid connection"));
