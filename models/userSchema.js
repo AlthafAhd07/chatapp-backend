@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    avator: {
+    avatar: {
       type: String,
       default:
         "https://res.cloudinary.com/davg6e0yh/image/upload/v1632832500/blog_site/avatardefault_92824_c4u8sm.png",

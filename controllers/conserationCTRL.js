@@ -11,15 +11,14 @@ const conservationCTRL = {
       return res.status(400).json({ msg: "Opposite person not found" });
     }
     // check in database
-    const participant = [username, opponent];
 
     let chat = await conservationSchema.find({
-      participant: { $all: participant },
+      Chatname: { $regex: username },
     });
     const opponentUserData = await userSchema.find(
       { username: opponent },
-      { _id: 0, username: 1, online: 1, avator: 1 }
-    )[0];
+      { _id: 0, username: 1, online: 1, avatar: 1 }
+    );
 
     if (!chat.length) {
       const newChat_data = {
@@ -30,8 +29,8 @@ const conservationCTRL = {
             avatar,
           },
           {
-            name: opponentUserData.username,
-            avatar: opponentUserData.avator,
+            name: opponentUserData[0].username,
+            avatar: opponentUserData[0].avatar,
           },
         ],
         unReadMsgs: {
@@ -43,13 +42,13 @@ const conservationCTRL = {
       await chat.save();
       const respond = {
         ...chat._doc,
-        opponentUserData: opponentUserData,
+        opponentUserData: opponentUserData[0],
       };
       return res.status(200).json({ msg: respond });
     } else {
       const respond = {
         ...chat[0]._doc,
-        opponentUserData: opponentUserData,
+        opponentUserData: opponentUserData[0],
       };
       return res.status(200).json({ msg: respond });
     }
@@ -96,10 +95,11 @@ const conservationCTRL = {
     if (!username) return;
     const chats = await conservationSchema.find(
       {
-        participant: { $all: username },
+        Chatname: { $regex: username },
       },
       { _id: 1, participant: 1, messages: { $slice: -1 }, unReadMsgs: 1 }
     );
+
     res.status(200).json({ msg: chats });
   },
   updateMsgStatus: async (req, res) => {
