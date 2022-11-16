@@ -119,12 +119,12 @@ io.on("connection", async (socket) => {
   // getting users chat list
   const opponentChats = await Conversations.find(
     {
-      participant: { $all: username },
+      Chatname: { $regex: username },
     },
     { participant: 1 }
   );
   const userChatOpponents = opponentChats.map(
-    (i) => i.participant.filter((name) => name !== username)[0]
+    (i) => i.participant.filter((name) => name.name !== username)[0].name
   );
 
   const opponentUsersWhoAreOnline = onlineUsers.filter((element) => {
