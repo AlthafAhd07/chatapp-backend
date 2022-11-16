@@ -1,10 +1,10 @@
 import conservationSchema from "../models/conservationSchema.js";
-import { v4 as uuidv4 } from "uuid";
+
 import userSchema from "../models/userSchema.js";
 const conservationCTRL = {
   getSpecificConservation: async (req, res) => {
     const { opponent } = req.body;
-    const { username } = req.user;
+    const { username, avatar } = req.user;
 
     if (!username) return;
     if (!opponent) {
@@ -19,12 +19,21 @@ const conservationCTRL = {
     const opponentUserData = await userSchema.find(
       { username: opponent },
       { _id: 0, username: 1, online: 1, avator: 1 }
-    );
+    )[0];
 
     if (!chat.length) {
       const newChat_data = {
         Chatname: username + "_" + opponent,
-        participant,
+        participant: [
+          {
+            name: username,
+            avatar,
+          },
+          {
+            name: opponentUserData.username,
+            avatar: opponentUserData.avator,
+          },
+        ],
         unReadMsgs: {
           [username]: 0,
           [opponent]: 0,
@@ -34,13 +43,13 @@ const conservationCTRL = {
       await chat.save();
       const respond = {
         ...chat._doc,
-        opponentUserData: opponentUserData[0],
+        opponentUserData: opponentUserData,
       };
       return res.status(200).json({ msg: respond });
     } else {
       const respond = {
         ...chat[0]._doc,
-        opponentUserData: opponentUserData[0],
+        opponentUserData: opponentUserData,
       };
       return res.status(200).json({ msg: respond });
     }

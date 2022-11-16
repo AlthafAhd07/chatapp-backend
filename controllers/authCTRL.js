@@ -111,10 +111,6 @@ const userCtrl = {
 
     try {
       res.clearCookie("refresh_token", { path: "/api/refresh_token" });
-      res.clearCookie("fbm_285488849784352", { path: "/" });
-      res.clearCookie("fbsr_285488849784352", { path: "/" });
-      res.clearCookie("G_AUTHUSER_H", { path: "/" });
-      res.clearCookie("G_ENABLED_IDPS", { path: "/" });
       await Users.findOneAndUpdate(
         { _id: req.user._id },
         {
