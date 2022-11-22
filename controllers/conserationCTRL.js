@@ -12,13 +12,17 @@ const conservationCTRL = {
     }
     // check in database
 
-    let chat = await conservationSchema.find({
-      Chatname: { $regex: username },
-    });
     const opponentUserData = await userSchema.find(
       { username: opponent },
       { _id: 0, username: 1, online: 1, avatar: 1 }
     );
+
+    let chat = await conservationSchema.find({
+      $and: [
+        { Chatname: { $regex: username } },
+        { Chatname: { $regex: opponentUserData[0].username } },
+      ],
+    });
 
     if (!chat.length) {
       const newChat_data = {
@@ -43,6 +47,7 @@ const conservationCTRL = {
       const respond = {
         ...chat._doc,
         opponentUserData: opponentUserData[0],
+        newChat: true,
       };
       return res.status(200).json({ msg: respond });
     } else {
@@ -55,7 +60,8 @@ const conservationCTRL = {
   },
   updateMessage: async (req, res) => {
     const { opponent, newMsg } = req.body;
-    const { username } = req.user;
+    const { username, avatar } = req.user;
+
     if (!username) return;
     if (!opponent) {
       return res.status(400).json({ msg: "Opposite person not found" });
@@ -64,26 +70,18 @@ const conservationCTRL = {
       return res.status(400).json({ msg: "Message not found" });
     }
     // check in database
-    const participant = [username, opponent];
-    // const newMsg = {
-    //   id: uuidv4(),
-    //   from: username,
-    //   message,
-    //   time: new Date().toLocaleString("en-US", {
-    //     hour: "numeric",
-    //     minute: "numeric",
-    //     hour12: true,
-    //   }),
-    //   date: new Date().toLocaleDateString("fr-CA"),
-    //   status: "sent",
-    // };
+    // const participant = [{ username, avatar }, opponent];
+
     const updatedChat = await conservationSchema.updateOne(
       {
-        participant: { $all: participant },
+        $and: [
+          { participant: { $elemMatch: { name: username, avatar } } },
+          { participant: { $elemMatch: opponent } },
+        ],
       },
       {
         $push: { messages: newMsg },
-        $inc: { [`unReadMsgs.${opponent}`]: 1 },
+        $inc: { [`unReadMsgs.${opponent.name}`]: 1 },
       }
     );
 
@@ -108,6 +106,8 @@ const conservationCTRL = {
     if (!conversationId || !msgId) {
       return res.status(400).json({ msg: "needed data missing" });
     }
+
+    console.log("hi");
 
     await conservationSchema.findOneAndUpdate(
       {

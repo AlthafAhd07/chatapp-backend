@@ -117,12 +117,14 @@ io.on("connection", async (socket) => {
   await Users.findOneAndUpdate({ username }, { online: ["true", "now"] });
 
   // getting users chat list
+
   const opponentChats = await Conversations.find(
     {
       Chatname: { $regex: username },
     },
     { participant: 1 }
   );
+
   const userChatOpponents = opponentChats.map(
     (i) => i.participant.filter((name) => name.name !== username)[0].name
   );
@@ -142,6 +144,24 @@ io.on("connection", async (socket) => {
       }
     }
   }
+
+  // socket.on("newUserUpdate", async () => {
+  //   const opponentChats = await Conversations.find(
+  //     {
+  //       Chatname: { $regex: username },
+  //     },
+  //     { participant: 1 }
+  //   );
+  //   const userChatOpponents = opponentChats.map(
+  //     (i) => i.participant.filter((name) => name.name !== username)[0].name
+  //   );
+
+  //   const opponentUsersWhoAreOnline = onlineUsers.filter((element) => {
+  //     return userChatOpponents.includes(element.username);
+  //   });
+  //   socket.emit("onlineusers", opponentUsersWhoAreOnline);
+  // });
+
   socket.emit("onlineusers", opponentUsersWhoAreOnline);
 
   // joining chat room
@@ -153,6 +173,7 @@ io.on("connection", async (socket) => {
   });
 
   socket.on("send_message", ({ message, room, conversationId, receiver }) => {
+    console.log(message, room, conversationId, receiver);
     const rooms = io.of("/").adapter.rooms;
     const roomCount = rooms.get(room);
     if (roomCount?.size === 1) {
