@@ -16,6 +16,7 @@ const images = [
   "https://res.cloudinary.com/davg6e0yh/image/upload/v1668563967/avatar-gab45b8fa4_640_1_n1k8ur.png",
   "https://res.cloudinary.com/davg6e0yh/image/upload/v1668563968/businessman-g7205c9a96_640_jhplmn.png",
 ];
+
 const userCtrl = {
   register: async (req, res) => {
     try {
@@ -133,6 +134,7 @@ const userCtrl = {
       return res.status(500).json({ msg: error.message });
     }
   },
+
   refreshToken: async (req, res) => {
     try {
       // cookie la endu refresh token a edukkura
@@ -178,6 +180,8 @@ const userCtrl = {
       // final a access token create panni userkku anuppura
 
       const access_token = Access_token({ id: user._id });
+
+      delete user._doc.rf_token;
 
       res.json({ access_token, user });
     } catch (error) {

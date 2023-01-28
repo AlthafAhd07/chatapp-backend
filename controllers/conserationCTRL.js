@@ -107,8 +107,6 @@ const conservationCTRL = {
       return res.status(400).json({ msg: "needed data missing" });
     }
 
-    console.log("hi");
-
     await conservationSchema.findOneAndUpdate(
       {
         _id: conversationId,

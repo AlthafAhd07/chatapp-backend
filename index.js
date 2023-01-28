@@ -27,7 +27,7 @@ const PORT = process.env.PORT || 5000;
 const CLIENT__URL = process.env.CLIENT__URL;
 
 mongoose.connect(
-  `${process.env.MONGODB_URI}`,
+  `mongodb://127.0.0.1:27017/realtimeChatApp`,
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -145,22 +145,22 @@ io.on("connection", async (socket) => {
     }
   }
 
-  // socket.on("newUserUpdate", async () => {
-  //   const opponentChats = await Conversations.find(
-  //     {
-  //       Chatname: { $regex: username },
-  //     },
-  //     { participant: 1 }
-  //   );
-  //   const userChatOpponents = opponentChats.map(
-  //     (i) => i.participant.filter((name) => name.name !== username)[0].name
-  //   );
+  socket.on("newUserUpdate", async () => {
+    const opponentChats = await Conversations.find(
+      {
+        Chatname: { $regex: username },
+      },
+      { participant: 1 }
+    );
+    const userChatOpponents = opponentChats.map(
+      (i) => i.participant.filter((name) => name.name !== username)[0].name
+    );
 
-  //   const opponentUsersWhoAreOnline = onlineUsers.filter((element) => {
-  //     return userChatOpponents.includes(element.username);
-  //   });
-  //   socket.emit("onlineusers", opponentUsersWhoAreOnline);
-  // });
+    const opponentUsersWhoAreOnline = onlineUsers.filter((element) => {
+      return userChatOpponents.includes(element.username);
+    });
+    socket.emit("onlineusers", opponentUsersWhoAreOnline);
+  });
 
   socket.emit("onlineusers", opponentUsersWhoAreOnline);
 
@@ -192,6 +192,10 @@ io.on("connection", async (socket) => {
       socket.to(room).emit("receive_msg", message);
     }
   });
+
+  // socket.on("send_message", ({ message, room, conversationId, receiver }) => {
+  //   socket.to(room).emit("receive_msg", message);
+  // });
 
   socket.on("sent_typer", ({ typingUser, room }) => {
     socket.to(room).emit("receive_typer", typingUser);

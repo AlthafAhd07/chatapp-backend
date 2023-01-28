@@ -8,7 +8,7 @@ export const Activation_token = (payload) => {
 
 export const Access_token = (payload) => {
   return jwt.sign(payload, `${process.env.ACCESS_TOKEN_SECRET}`, {
-    expiresIn: "15s",
+    expiresIn: "15m",
   });
 };
 
